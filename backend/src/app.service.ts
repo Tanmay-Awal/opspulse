@@ -7,7 +7,6 @@ export class AppService {
 
   async getHealth() {
     try {
-      // Try to query the database
       await this.prisma.$queryRaw`SELECT 1`;
 
       return {
