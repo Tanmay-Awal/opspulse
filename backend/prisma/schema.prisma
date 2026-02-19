@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id            String   @id @default(uuid())
+  name          String
+  domain        String   @unique
+  webhookSecret String   @map("webhook_secret")
+  plan          String   @default("free")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  users         User[]
+  incidents     Incident[]
+
+  @@map("organizations")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  orgId        String   @map("org_id")
+  email        String
+  name         String
+  role         String   @default("engineer")
+  phoneNumber  String?  @map("phone_number")
+  slackUserId  String?  @map("slack_user_id")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  
+  @@unique([orgId, email])
+  @@map("users")
+}
+
+model Incident {
+  id                  String    @id @default(uuid())
+  orgId               String    @map("org_id")
+  title               String
+  status              String    @default("open")
+  priority            String
+  source              String
+  eventType           String    @map("event_type")
+  assignedTo          String?   @map("assigned_to")
+  escalationLevel     Int       @default(0) @map("escalation_level")
+  eventCount          Int       @default(1) @map("event_count")
+  acknowledgedAt      DateTime? @map("acknowledged_at")
+  acknowledgedBy      String?   @map("acknowledged_by")
+  resolvedAt          DateTime? @map("resolved_at")
+  resolvedBy          String?   @map("resolved_by")
+  rootCauseCategory   String?   @map("root_cause_category")
+  resolutionNotes     String?   @map("resolution_notes")
+  metadata            Json?
+  createdAt           DateTime  @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [orgId], references: [id])
+
+  @@index([orgId, status])
+  @@index([orgId, createdAt])
+  @@index([assignedTo, status])
+  @@map("incidents")
+}
