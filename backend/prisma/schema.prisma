@@ -17,6 +17,7 @@ model Organization {
 
   users         User[]
   incidents     Incident[]
+  onCallSchedules  OnCallSchedule[]
 
   @@map("organizations")
 }
@@ -64,4 +65,34 @@ model Incident {
   @@index([orgId, createdAt])
   @@index([assignedTo, status])
   @@map("incidents")
+}
+
+
+model IncidentEvent {
+  id          String   @id @default(uuid())
+  incidentId  String   @map("incident_id")
+  source      String
+  eventType   String   @map("event_type")
+  message     String
+  severity    String?
+  payload     Json
+  receivedAt  DateTime @default(now()) @map("received_at")
+
+  @@index([incidentId])
+  @@map("incident_events")
+}
+
+model OnCallSchedule {
+  id              String   @id @default(uuid())
+  orgId           String   @map("org_id")
+  teamName        String   @map("team_name")
+  currentOnCallId String   @map("current_oncall_id")
+  rotationType    String   @default("weekly") @map("rotation_type")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [orgId], references: [id])
+
+  @@index([orgId])
+  @@map("on_call_schedules")
 }

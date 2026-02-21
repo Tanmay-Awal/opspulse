@@ -45,6 +45,22 @@ async function main() {
     });
     console.log('✅ Created user:', raj.email);
 
+    // Delete old on-call schedule if exists (for re-seeding)
+    await prisma.onCallSchedule.deleteMany({
+        where: { orgId: org.id },
+    });
+
+    // Create on-call schedule
+    const onCallSchedule = await prisma.onCallSchedule.create({
+        data: {
+            orgId: org.id,
+            teamName: 'Backend Team',
+            currentOnCallId: maya.id,
+            rotationType: 'weekly',
+        },
+    });
+    console.log('✅ Created on-call schedule: Backend Team (Maya is on-call)');
+
     console.log('🎉 Seeding complete!');
 }
 

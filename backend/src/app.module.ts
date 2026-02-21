@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { IncidentsModule } from './incidents/incidents.module';
+import { WebhooksModule } from './webhooks/webhooks.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { IncidentsModule } from './incidents/incidents.module';
     }),
     PrismaModule,
     IncidentsModule,
+    WebhooksModule,
   ],
   controllers: [AppController],
   providers: [AppService],
