@@ -1,0 +1,19 @@
+src/notifications/channels/email.channel.ts(14,22): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/notifications/channels/email.channel.ts(16,5): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/notifications/channels/email.channel.ts(17,5): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/notifications/channels/slack.channel.ts(11,9): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/notifications/channels/sms.channel.ts(15,9): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/notifications/channels/sms.channel.ts(17,29): error TS2349: This expression is not callable.
+  Type 'typeof TwilioSDK' has no call signatures.
+src/notifications/notifications.service.ts(55,30): error TS2345: Argument of type 'NotificationResult' is not assignable to parameter of type 'never'.
+src/notifications/notifications.service.ts(59,59): error TS2345: Argument of type '{ id: string; name: string; email: string; phoneNumber: string | null; }' is not assignable to parameter of type '{ phoneNumber: string; }'.
+  Types of property 'phoneNumber' are incompatible.
+    Type 'string | null' is not assignable to type 'string'.
+      Type 'null' is not assignable to type 'string'.
+src/notifications/notifications.service.ts(60,30): error TS2345: Argument of type 'NotificationResult' is not assignable to parameter of type 'never'.
+src/notifications/notifications.service.ts(65,30): error TS2345: Argument of type 'NotificationResult' is not assignable to parameter of type 'never'.

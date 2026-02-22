@@ -15,16 +15,19 @@ const prisma_service_1 = require("../prisma/prisma.service");
 const deduplication_service_1 = require("./services/deduplication.service");
 const severity_classifier_service_1 = require("./services/severity-classifier.service");
 const oncall_service_1 = require("./services/oncall.service");
+const notifications_service_1 = require("../notifications/notifications.service");
 let WebhooksService = class WebhooksService {
     prisma;
     deduplicationService;
     severityClassifier;
     onCallService;
-    constructor(prisma, deduplicationService, severityClassifier, onCallService) {
+    notificationService;
+    constructor(prisma, deduplicationService, severityClassifier, onCallService, notificationService) {
         this.prisma = prisma;
         this.deduplicationService = deduplicationService;
         this.severityClassifier = severityClassifier;
         this.onCallService = onCallService;
+        this.notificationService = notificationService;
     }
     async processIncomingWebhook(orgId, webhookDto) {
         console.log(`\n🔔 Incoming webhook: ${webhookDto.source} - ${webhookDto.type}`);
@@ -87,6 +90,7 @@ let WebhooksService = class WebhooksService {
             },
         });
         console.log(`✅ Incident created: #${incident.id.substring(0, 8)} (${priority})`);
+        await this.notificationService.notifyIncidentCreated(incident);
         return {
             action: 'created',
             incidentId: incident.id,
@@ -106,6 +110,7 @@ exports.WebhooksService = WebhooksService = __decorate([
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         deduplication_service_1.DeduplicationService,
         severity_classifier_service_1.SeverityClassifierService,
-        oncall_service_1.OnCallService])
+        oncall_service_1.OnCallService,
+        notifications_service_1.NotificationsService])
 ], WebhooksService);
 //# sourceMappingURL=webhooks.service.js.map

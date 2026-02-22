@@ -4,6 +4,8 @@ import { IncomingWebhookDto } from './dto';
 import { DeduplicationService } from './services/deduplication.service';
 import { SeverityClassifierService } from './services/severity-classifier.service';
 import { OnCallService } from './services/oncall.service';
+import { NotificationsService } from '../notifications/notifications.service';
+
 
 @Injectable()
 export class WebhooksService {
@@ -12,6 +14,7 @@ export class WebhooksService {
         private deduplicationService: DeduplicationService,
         private severityClassifier: SeverityClassifierService,
         private onCallService: OnCallService,
+        private notificationService: NotificationsService,
     ) { }
 
     async processIncomingWebhook(orgId: string, webhookDto: IncomingWebhookDto) {
@@ -97,8 +100,8 @@ export class WebhooksService {
 
         console.log(`✅ Incident created: #${incident.id.substring(0, 8)} (${priority})`);
 
-        // TODO Phase 3: Send notifications here
-        // await this.notificationService.notifyIncidentCreated(incident);
+        // Send notifications
+        await this.notificationService.notifyIncidentCreated(incident);
 
         return {
             action: 'created',

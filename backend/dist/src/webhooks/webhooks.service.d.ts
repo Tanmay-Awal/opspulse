@@ -3,12 +3,14 @@ import { IncomingWebhookDto } from './dto';
 import { DeduplicationService } from './services/deduplication.service';
 import { SeverityClassifierService } from './services/severity-classifier.service';
 import { OnCallService } from './services/oncall.service';
+import { NotificationsService } from '../notifications/notifications.service';
 export declare class WebhooksService {
     private prisma;
     private deduplicationService;
     private severityClassifier;
     private onCallService;
-    constructor(prisma: PrismaService, deduplicationService: DeduplicationService, severityClassifier: SeverityClassifierService, onCallService: OnCallService);
+    private notificationService;
+    constructor(prisma: PrismaService, deduplicationService: DeduplicationService, severityClassifier: SeverityClassifierService, onCallService: OnCallService, notificationService: NotificationsService);
     processIncomingWebhook(orgId: string, webhookDto: IncomingWebhookDto): Promise<{
         action: string;
         incidentId: string;
