@@ -16,11 +16,11 @@ async function bootstrap() {
 
   // Enable CORS (for frontend later)
   app.enableCors({
-    origin: 'http://localhost:3001', // Next.js default port
+    origin: ['http://localhost:3001', 'http://localhost:3000'], // Next.js default port
     credentials: true,
   });
 
-  await app.listen(3000);
-  console.log('🚀 OpsPulse Backend running on http://localhost:3000');
+  await app.listen(3001);
+  console.log('🚀 OpsPulse Backend running on http://localhost:3001');
 }
 bootstrap();
