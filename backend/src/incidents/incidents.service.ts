@@ -1,9 +1,14 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateIncidentDto, UpdateIncidentDto, QueryIncidentsDto, IncidentStatus, IncidentPriority } from './dto/index';
+import { AuditService, AuditAction } from '../audit/audit.service';
+
 @Injectable()
 export class IncidentsService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private auditService: AuditService,
+    ) { }
 
     /**
      * Create a new incident
@@ -130,20 +135,18 @@ export class IncidentsService {
         const updateData: any = {};
 
         if (status) {
-            // Validate state transition (we'll add full state machine later)
+            // Validate state transition
             this.validateStatusTransition(existingIncident.status, status);
             updateData.status = status;
 
             // If transitioning to acknowledged
             if (status === IncidentStatus.ACKNOWLEDGED && !existingIncident.acknowledgedAt) {
                 updateData.acknowledgedAt = new Date();
-                // We'll add acknowledgedBy once we have auth
             }
 
             // If transitioning to resolved
             if (status === IncidentStatus.RESOLVED && !existingIncident.resolvedAt) {
                 updateData.resolvedAt = new Date();
-                // We'll add resolvedBy once we have auth
             }
         }
 
@@ -202,5 +205,114 @@ export class IncidentsService {
         console.log(`✅ Incident closed: #${id.substring(0, 8)}`);
 
         return deleted;
+    }
+
+    /**
+     * Acknowledge an incident
+     */
+    async acknowledge(id: string, orgId: string, acknowledgedBy?: string) {
+        const incident = await this.findOne(id, orgId);
+
+        if (incident.status !== 'open') {
+            throw new BadRequestException('Only open incidents can be acknowledged');
+        }
+
+        const updatedIncident = await this.prisma.incident.update({
+            where: { id },
+            data: {
+                status: 'acknowledged',
+                acknowledgedAt: new Date(),
+                acknowledgedBy: acknowledgedBy || null,
+            },
+            include: {
+                organization: {
+                    select: { id: true, name: true },
+                },
+            },
+        });
+
+        console.log(`✅ Incident acknowledged: #${id.substring(0, 8)}`);
+
+        // Audit log
+        const actorEmail = acknowledgedBy
+            ? (await this.prisma.user.findUnique({
+                where: { id: acknowledgedBy },
+                select: { email: true }
+            }))?.email || 'unknown'
+            : 'unknown';
+
+        await this.auditService.log({
+            incidentId: id,
+            action: AuditAction.INCIDENT_ACKNOWLEDGED,
+            actorId: acknowledgedBy,
+            actorEmail,
+            fromValue: { status: 'open' },
+            toValue: {
+                status: 'acknowledged',
+                acknowledgedAt: updatedIncident.acknowledgedAt
+            },
+        });
+
+        return updatedIncident;
+    }
+
+    /**
+     * Resolve an incident
+     */
+    async resolve(
+        id: string,
+        orgId: string,
+        resolveData: {
+            resolvedBy?: string;
+            rootCauseCategory?: string;
+            resolutionNotes?: string;
+        },
+    ) {
+        const incident = await this.findOne(id, orgId);
+
+        if (!['acknowledged', 'investigating'].includes(incident.status)) {
+            throw new BadRequestException('Incident must be acknowledged before resolving');
+        }
+
+        const updatedIncident = await this.prisma.incident.update({
+            where: { id },
+            data: {
+                status: 'resolved',
+                resolvedAt: new Date(),
+                resolvedBy: resolveData.resolvedBy || null,
+                rootCauseCategory: resolveData.rootCauseCategory,
+                resolutionNotes: resolveData.resolutionNotes,
+            },
+            include: {
+                organization: {
+                    select: { id: true, name: true },
+                },
+            },
+        });
+
+        console.log(`✅ Incident resolved: #${id.substring(0, 8)}`);
+
+        // Audit log
+        const actorEmail = resolveData.resolvedBy
+            ? (await this.prisma.user.findUnique({
+                where: { id: resolveData.resolvedBy },
+                select: { email: true }
+            }))?.email || 'unknown'
+            : 'unknown';
+
+        await this.auditService.log({
+            incidentId: id,
+            action: AuditAction.INCIDENT_RESOLVED,
+            actorId: resolveData.resolvedBy,
+            actorEmail,
+            fromValue: { status: incident.status },
+            toValue: {
+                status: 'resolved',
+                resolvedAt: updatedIncident.resolvedAt,
+                rootCauseCategory: resolveData.rootCauseCategory,
+            },
+        });
+
+        return updatedIncident;
     }
 }

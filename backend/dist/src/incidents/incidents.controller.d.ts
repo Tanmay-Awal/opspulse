@@ -131,4 +131,70 @@ export declare class IncidentsController {
         resolvedAt: Date | null;
         resolvedBy: string | null;
     }>;
+    acknowledge(id: string, orgId: string): Promise<{
+        organization: {
+            id: string;
+            name: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        orgId: string;
+        source: string;
+        eventType: string;
+        title: string;
+        priority: string;
+        assignedTo: string | null;
+        metadata: import("@prisma/client/runtime/library").JsonValue | null;
+        status: string;
+        rootCauseCategory: string | null;
+        resolutionNotes: string | null;
+        escalationLevel: number;
+        eventCount: number;
+        acknowledgedAt: Date | null;
+        acknowledgedBy: string | null;
+        resolvedAt: Date | null;
+        resolvedBy: string | null;
+    }>;
+    resolve(id: string, orgId: string, resolveData: {
+        rootCauseCategory?: string;
+        resolutionNotes?: string;
+    }): Promise<{
+        organization: {
+            id: string;
+            name: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        orgId: string;
+        source: string;
+        eventType: string;
+        title: string;
+        priority: string;
+        assignedTo: string | null;
+        metadata: import("@prisma/client/runtime/library").JsonValue | null;
+        status: string;
+        rootCauseCategory: string | null;
+        resolutionNotes: string | null;
+        escalationLevel: number;
+        eventCount: number;
+        acknowledgedAt: Date | null;
+        acknowledgedBy: string | null;
+        resolvedAt: Date | null;
+        resolvedBy: string | null;
+    }>;
+    getAuditTrail(id: string, orgId: string): Promise<{
+        id: string;
+        metadata: import("@prisma/client/runtime/library").JsonValue | null;
+        incidentId: string;
+        action: string;
+        actorId: string | null;
+        actorEmail: string | null;
+        fromValue: import("@prisma/client/runtime/library").JsonValue | null;
+        toValue: import("@prisma/client/runtime/library").JsonValue | null;
+        ipAddress: string | null;
+        userAgent: string | null;
+        timestamp: Date;
+    }[]>;
 }

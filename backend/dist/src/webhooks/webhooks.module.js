@@ -13,6 +13,8 @@ const webhooks_controller_1 = require("./webhooks.controller");
 const deduplication_service_1 = require("./services/deduplication.service");
 const severity_classifier_service_1 = require("./services/severity-classifier.service");
 const oncall_service_1 = require("./services/oncall.service");
+const escalation_service_1 = require("./services/escalation.service");
+const sla_tracker_service_1 = require("./services/sla-tracker.service");
 let WebhooksModule = class WebhooksModule {
 };
 exports.WebhooksModule = WebhooksModule;
@@ -24,6 +26,8 @@ exports.WebhooksModule = WebhooksModule = __decorate([
             deduplication_service_1.DeduplicationService,
             severity_classifier_service_1.SeverityClassifierService,
             oncall_service_1.OnCallService,
+            escalation_service_1.EscalationService,
+            sla_tracker_service_1.SlaTrackerService,
         ],
         exports: [webhooks_service_1.WebhooksService],
     })

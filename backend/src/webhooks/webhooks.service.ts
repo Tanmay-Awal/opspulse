@@ -5,6 +5,7 @@ import { DeduplicationService } from './services/deduplication.service';
 import { SeverityClassifierService } from './services/severity-classifier.service';
 import { OnCallService } from './services/oncall.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { AuditService, AuditAction } from '../audit/audit.service';
 
 
 @Injectable()
@@ -15,6 +16,7 @@ export class WebhooksService {
         private severityClassifier: SeverityClassifierService,
         private onCallService: OnCallService,
         private notificationService: NotificationsService,
+        private auditService: AuditService,
     ) { }
 
     async processIncomingWebhook(orgId: string, webhookDto: IncomingWebhookDto) {
@@ -99,6 +101,22 @@ export class WebhooksService {
         });
 
         console.log(`✅ Incident created: #${incident.id.substring(0, 8)} (${priority})`);
+
+        // Log incident creation in audit trail
+        await this.auditService.log({
+            incidentId: incident.id,
+            action: AuditAction.INCIDENT_CREATED,
+            actorEmail: 'system',
+            toValue: {
+                priority,
+                source,
+                eventType: type,
+                assignedTo: onCallUserId,
+            },
+            metadata: {
+                webhookSource: source,
+            },
+        });
 
         // Send notifications
         await this.notificationService.notifyIncidentCreated(incident);

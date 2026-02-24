@@ -15,6 +15,9 @@ const prisma_module_1 = require("./prisma/prisma.module");
 const incidents_module_1 = require("./incidents/incidents.module");
 const webhooks_module_1 = require("./webhooks/webhooks.module");
 const notifications_module_1 = require("./notifications/notifications.module");
+const audit_module_1 = require("./audit/audit.module");
+const escalation_service_1 = require("./webhooks/services/escalation.service");
+const schedule_1 = require("@nestjs/schedule");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -24,13 +27,15 @@ exports.AppModule = AppModule = __decorate([
             config_1.ConfigModule.forRoot({
                 isGlobal: true,
             }),
+            schedule_1.ScheduleModule.forRoot(),
             prisma_module_1.PrismaModule,
             incidents_module_1.IncidentsModule,
             webhooks_module_1.WebhooksModule,
             notifications_module_1.NotificationsModule,
+            audit_module_1.AuditModule,
         ],
         controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService],
+        providers: [app_service_1.AppService, escalation_service_1.EscalationService],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

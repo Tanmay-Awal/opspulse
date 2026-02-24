@@ -13,10 +13,13 @@ exports.IncidentsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const index_1 = require("./dto/index");
+const audit_service_1 = require("../audit/audit.service");
 let IncidentsService = class IncidentsService {
     prisma;
-    constructor(prisma) {
+    auditService;
+    constructor(prisma, auditService) {
         this.prisma = prisma;
+        this.auditService = auditService;
     }
     async create(createIncidentDto) {
         const { orgId, source, eventType, title, priority, assignedTo, metadata } = createIncidentDto;
@@ -159,10 +162,90 @@ let IncidentsService = class IncidentsService {
         console.log(`✅ Incident closed: #${id.substring(0, 8)}`);
         return deleted;
     }
+    async acknowledge(id, orgId, acknowledgedBy) {
+        const incident = await this.findOne(id, orgId);
+        if (incident.status !== 'open') {
+            throw new common_1.BadRequestException('Only open incidents can be acknowledged');
+        }
+        const updatedIncident = await this.prisma.incident.update({
+            where: { id },
+            data: {
+                status: 'acknowledged',
+                acknowledgedAt: new Date(),
+                acknowledgedBy: acknowledgedBy || null,
+            },
+            include: {
+                organization: {
+                    select: { id: true, name: true },
+                },
+            },
+        });
+        console.log(`✅ Incident acknowledged: #${id.substring(0, 8)}`);
+        const actorEmail = acknowledgedBy
+            ? (await this.prisma.user.findUnique({
+                where: { id: acknowledgedBy },
+                select: { email: true }
+            }))?.email || 'unknown'
+            : 'unknown';
+        await this.auditService.log({
+            incidentId: id,
+            action: audit_service_1.AuditAction.INCIDENT_ACKNOWLEDGED,
+            actorId: acknowledgedBy,
+            actorEmail,
+            fromValue: { status: 'open' },
+            toValue: {
+                status: 'acknowledged',
+                acknowledgedAt: updatedIncident.acknowledgedAt
+            },
+        });
+        return updatedIncident;
+    }
+    async resolve(id, orgId, resolveData) {
+        const incident = await this.findOne(id, orgId);
+        if (!['acknowledged', 'investigating'].includes(incident.status)) {
+            throw new common_1.BadRequestException('Incident must be acknowledged before resolving');
+        }
+        const updatedIncident = await this.prisma.incident.update({
+            where: { id },
+            data: {
+                status: 'resolved',
+                resolvedAt: new Date(),
+                resolvedBy: resolveData.resolvedBy || null,
+                rootCauseCategory: resolveData.rootCauseCategory,
+                resolutionNotes: resolveData.resolutionNotes,
+            },
+            include: {
+                organization: {
+                    select: { id: true, name: true },
+                },
+            },
+        });
+        console.log(`✅ Incident resolved: #${id.substring(0, 8)}`);
+        const actorEmail = resolveData.resolvedBy
+            ? (await this.prisma.user.findUnique({
+                where: { id: resolveData.resolvedBy },
+                select: { email: true }
+            }))?.email || 'unknown'
+            : 'unknown';
+        await this.auditService.log({
+            incidentId: id,
+            action: audit_service_1.AuditAction.INCIDENT_RESOLVED,
+            actorId: resolveData.resolvedBy,
+            actorEmail,
+            fromValue: { status: incident.status },
+            toValue: {
+                status: 'resolved',
+                resolvedAt: updatedIncident.resolvedAt,
+                rootCauseCategory: resolveData.rootCauseCategory,
+            },
+        });
+        return updatedIncident;
+    }
 };
 exports.IncidentsService = IncidentsService;
 exports.IncidentsService = IncidentsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        audit_service_1.AuditService])
 ], IncidentsService);
 //# sourceMappingURL=incidents.service.js.map

@@ -16,18 +16,21 @@ const deduplication_service_1 = require("./services/deduplication.service");
 const severity_classifier_service_1 = require("./services/severity-classifier.service");
 const oncall_service_1 = require("./services/oncall.service");
 const notifications_service_1 = require("../notifications/notifications.service");
+const audit_service_1 = require("../audit/audit.service");
 let WebhooksService = class WebhooksService {
     prisma;
     deduplicationService;
     severityClassifier;
     onCallService;
     notificationService;
-    constructor(prisma, deduplicationService, severityClassifier, onCallService, notificationService) {
+    auditService;
+    constructor(prisma, deduplicationService, severityClassifier, onCallService, notificationService, auditService) {
         this.prisma = prisma;
         this.deduplicationService = deduplicationService;
         this.severityClassifier = severityClassifier;
         this.onCallService = onCallService;
         this.notificationService = notificationService;
+        this.auditService = auditService;
     }
     async processIncomingWebhook(orgId, webhookDto) {
         console.log(`\n🔔 Incoming webhook: ${webhookDto.source} - ${webhookDto.type}`);
@@ -90,6 +93,20 @@ let WebhooksService = class WebhooksService {
             },
         });
         console.log(`✅ Incident created: #${incident.id.substring(0, 8)} (${priority})`);
+        await this.auditService.log({
+            incidentId: incident.id,
+            action: audit_service_1.AuditAction.INCIDENT_CREATED,
+            actorEmail: 'system',
+            toValue: {
+                priority,
+                source,
+                eventType: type,
+                assignedTo: onCallUserId,
+            },
+            metadata: {
+                webhookSource: source,
+            },
+        });
         await this.notificationService.notifyIncidentCreated(incident);
         return {
             action: 'created',
@@ -111,6 +128,7 @@ exports.WebhooksService = WebhooksService = __decorate([
         deduplication_service_1.DeduplicationService,
         severity_classifier_service_1.SeverityClassifierService,
         oncall_service_1.OnCallService,
-        notifications_service_1.NotificationsService])
+        notifications_service_1.NotificationsService,
+        audit_service_1.AuditService])
 ], WebhooksService);
 //# sourceMappingURL=webhooks.service.js.map

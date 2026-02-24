@@ -6,18 +6,24 @@ import { PrismaModule } from './prisma/prisma.module';
 import { IncidentsModule } from './incidents/incidents.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { NotificationsModule } from './notifications/notifications.module';  // ADD THIS
+import { AuditModule } from './audit/audit.module';
+import { EscalationService } from './webhooks/services/escalation.service';
+import { ScheduleModule } from '@nestjs/schedule';
+
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     IncidentsModule,
     WebhooksModule,
-    NotificationsModule,  // ADD THIS
+    NotificationsModule,
+    AuditModule,  // ADD THIS
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, EscalationService],
 })
 export class AppModule { }

@@ -61,6 +61,24 @@ async function main() {
     });
     console.log('✅ Created on-call schedule: Backend Team (Maya is on-call)');
 
+    await prisma.escalationPolicy.deleteMany({
+        where: { orgId: org.id },
+    });
+
+    // Create escalation policy
+    const escalationPolicy = await prisma.escalationPolicy.create({
+        data: {
+            orgId: org.id,
+            teamName: 'Backend Team',
+            levels: [
+                { userId: maya.id, waitMinutes: 10 },  // Level 0: Maya (primary)
+                { userId: raj.id, waitMinutes: 10 },   // Level 1: Raj (backup)
+            ],
+            isActive: true,
+        },
+    });
+    console.log('✅ Created escalation policy: Maya → Raj');
+
     console.log('🎉 Seeding complete!');
 }
 

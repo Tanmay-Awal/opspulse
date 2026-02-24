@@ -49,6 +49,26 @@ let IncidentsController = class IncidentsController {
         }
         return this.incidentsService.remove(id, orgId);
     }
+    async acknowledge(id, orgId) {
+        if (!orgId) {
+            throw new common_1.BadRequestException('orgId query parameter is required');
+        }
+        return this.incidentsService.acknowledge(id, orgId);
+    }
+    async resolve(id, orgId, resolveData) {
+        if (!orgId) {
+            throw new common_1.BadRequestException('orgId query parameter is required');
+        }
+        return this.incidentsService.resolve(id, orgId, resolveData);
+    }
+    async getAuditTrail(id, orgId) {
+        if (!orgId) {
+            throw new common_1.BadRequestException('orgId query parameter is required');
+        }
+        await this.incidentsService.findOne(id, orgId);
+        const auditService = this.incidentsService['auditService'];
+        return auditService.getIncidentAuditTrail(id);
+    }
 };
 exports.IncidentsController = IncidentsController;
 __decorate([
@@ -93,6 +113,31 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], IncidentsController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Patch)(':id/acknowledge'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Query)('orgId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], IncidentsController.prototype, "acknowledge", null);
+__decorate([
+    (0, common_1.Patch)(':id/resolve'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Query)('orgId')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:returntype", Promise)
+], IncidentsController.prototype, "resolve", null);
+__decorate([
+    (0, common_1.Get)(':id/audit-trail'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Query)('orgId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], IncidentsController.prototype, "getAuditTrail", null);
 exports.IncidentsController = IncidentsController = __decorate([
     (0, common_1.Controller)('incidents'),
     __metadata("design:paramtypes", [incidents_service_1.IncidentsService])

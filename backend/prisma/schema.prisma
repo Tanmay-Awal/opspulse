@@ -18,6 +18,7 @@ model Organization {
   users         User[]
   incidents     Incident[]
   onCallSchedules  OnCallSchedule[]
+  escalationPolicies EscalationPolicy[] 
 
   @@map("organizations")
 }
@@ -95,4 +96,53 @@ model OnCallSchedule {
 
   @@index([orgId])
   @@map("on_call_schedules")
+}
+model EscalationPolicy {
+  id        String   @id @default(uuid())
+  orgId     String   @map("org_id")
+  teamName  String   @map("team_name")
+  levels    Json     // Array of {userId, waitMinutes}
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [orgId], references: [id])
+
+  @@index([orgId])
+  @@map("escalation_policies")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  incidentId String   @map("incident_id")
+  action     String
+  actorId    String?  @map("actor_id")
+  actorEmail String?  @map("actor_email")
+  fromValue  Json?    @map("from_value")
+  toValue    Json?    @map("to_value")
+  metadata   Json?
+  ipAddress  String?  @map("ip_address")
+  userAgent  String?  @map("user_agent")
+  timestamp  DateTime @default(now())
+
+  @@index([incidentId])
+  @@index([timestamp])
+  @@map("audit_logs")
+}
+
+model WebhookJob {
+  id           String   @id @default(uuid())
+  url          String
+  payload      Json
+  headers      Json?
+  attempts     Int      @default(0)
+  maxAttempts  Int      @default(6) @map("max_attempts")
+  status       String   @default("pending")
+  nextRetryAt  DateTime @default(now()) @map("next_retry_at")
+  lastError    String?  @map("last_error")
+  createdAt    DateTime @default(now()) @map("created_at")
+  completedAt  DateTime? @map("completed_at")
+
+  @@index([status, nextRetryAt])
+  @@map("webhook_jobs")
 }
