@@ -1,0 +1,9 @@
+﻿src/analytics/analytics.controller.ts(100,21): error TS2339: Property 'reportsService' does not exist on type 'AnalyticsController'.
+src/analytics/analytics.controller.ts(114,22): error TS1272: A type referenced in a decorated signature must be imported with 'import type' or a namespace import when 'isolatedModules' and 'emitDecoratorMetadata' are enabled.
+src/analytics/analytics.controller.ts(154,9): error TS18048: 'res' is possibly 'undefined'.
+src/analytics/analytics.controller.ts(155,9): error TS18048: 'res' is possibly 'undefined'.
+src/analytics/analytics.controller.ts(156,9): error TS18048: 'res' is possibly 'undefined'.
+src/analytics/reports.service.ts(169,13): error TS2304: Cannot find name 'slackMessage'.
+src/analytics/reports.service.ts(188,13): error TS2304: Cannot find name 'slackMessage'.
+src/analytics/reports.service.ts(198,9): error TS2304: Cannot find name 'slackMessage'.
+src/analytics/reports.service.ts(211,16): error TS2304: Cannot find name 'slackMessage'.

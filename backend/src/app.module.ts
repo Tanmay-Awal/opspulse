@@ -9,6 +9,7 @@ import { NotificationsModule } from './notifications/notifications.module';  // 
 import { AuditModule } from './audit/audit.module';
 import { EscalationService } from './webhooks/services/escalation.service';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 
 @Module({
@@ -21,7 +22,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     IncidentsModule,
     WebhooksModule,
     NotificationsModule,
-    AuditModule,  // ADD THIS
+    AuditModule,
+    AnalyticsModule,  // ADD THIS
   ],
   controllers: [AppController],
   providers: [AppService, EscalationService],

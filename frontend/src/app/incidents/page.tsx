@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { incidentsApi } from '@/lib/api';
+import { incidentsApi, analyticsApi } from '@/lib/api';
 import { Incident } from '@/types/incident';
 import {
     getPriorityColor,
@@ -11,12 +11,14 @@ import {
     formatStatus,
     formatDate,
 } from '@/lib/utils';
-import { Terminal, Activity, ArrowLeft, Filter, AlertTriangle } from 'lucide-react';
+import { Terminal, Activity, ArrowLeft, Filter, AlertTriangle, ShieldAlert, Award } from 'lucide-react';
 
 export default function IncidentsPage() {
     const [incidents, setIncidents] = useState<Incident[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<'all' | 'open' | 'acknowledged' | 'resolved'>('all');
+    const [slaRate, setSlaRate] = useState<number | null>(null);
+    const [p1Count, setP1Count] = useState<number | null>(null);
 
     useEffect(() => {
         fetchIncidents();
@@ -30,8 +32,14 @@ export default function IncidentsPage() {
             const params = filter !== 'all' ? { status: filter } : {};
             const data = await incidentsApi.getAll(params);
             setIncidents(data.data || []);
+
+            const endDate = new Date().toISOString().split('T')[0];
+            const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+            const sla = await analyticsApi.getSLAMetrics(startDate, endDate);
+            setSlaRate(sla.slaComplianceRate);
+            setP1Count(sla.p1Count);
         } catch (error) {
-            console.error('Failed to fetch incidents:', error);
+            console.error('Failed to fetch data:', error);
         } finally {
             setLoading(false);
         }
@@ -98,6 +106,27 @@ export default function IncidentsPage() {
                                 </button>
                             ))}
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Quick Analytics Bar */}
+            <div className="border-b border-neutral-800 bg-neutral-950/50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex gap-6 text-xs font-mono uppercase tracking-widest text-neutral-400">
+                    <div className="flex items-center gap-2">
+                        <Award size={14} className={slaRate && slaRate >= 95 ? 'text-acid-green' : 'text-neutral-500'} />
+                        <span>30D_SLA_RATE:</span>
+                        <span className={slaRate && slaRate >= 95 ? 'text-white' : 'text-neutral-500'}>
+                            {slaRate !== null ? `${slaRate}%` : '---'}
+                        </span>
+                    </div>
+                    <div className="w-px h-4 bg-neutral-800" />
+                    <div className="flex items-center gap-2">
+                        <ShieldAlert size={14} className={p1Count && p1Count > 0 ? 'text-deep-red' : 'text-neutral-500'} />
+                        <span>30D_P1_CRITS:</span>
+                        <span className={p1Count && p1Count > 0 ? 'text-white' : 'text-neutral-500'}>
+                            {p1Count !== null ? p1Count : '---'}
+                        </span>
                     </div>
                 </div>
             </div>

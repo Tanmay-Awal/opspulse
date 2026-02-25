@@ -18,6 +18,7 @@ const notifications_module_1 = require("./notifications/notifications.module");
 const audit_module_1 = require("./audit/audit.module");
 const escalation_service_1 = require("./webhooks/services/escalation.service");
 const schedule_1 = require("@nestjs/schedule");
+const analytics_module_1 = require("./analytics/analytics.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -33,6 +34,7 @@ exports.AppModule = AppModule = __decorate([
             webhooks_module_1.WebhooksModule,
             notifications_module_1.NotificationsModule,
             audit_module_1.AuditModule,
+            analytics_module_1.AnalyticsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService, escalation_service_1.EscalationService],

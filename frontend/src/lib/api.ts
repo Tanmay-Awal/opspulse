@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 // For demo, we'll hardcode the org ID
 // In production, this would come from user session
-const ORG_ID = process.env.NEXT_PUBLIC_ORG_ID || 'YOUR_ORG_ID_HERE';
+export const ORG_ID = process.env.NEXT_PUBLIC_ORG_ID || 'YOUR_ORG_ID_HERE';
 
 export const api = axios.create({
     baseURL: API_BASE_URL,
@@ -56,6 +56,43 @@ export const incidentsApi = {
     getAuditTrail: async (id: string) => {
         const response = await api.get(`/incidents/${id}/audit-trail`, {
             params: { orgId: ORG_ID },
+        });
+        return response.data;
+    },
+};
+
+export const analyticsApi = {
+    // Get SLA metrics
+    getSLAMetrics: async (startDate?: string, endDate?: string) => {
+        const params: any = { orgId: ORG_ID };
+        if (startDate) params.startDate = startDate;
+        if (endDate) params.endDate = endDate;
+        const response = await api.get('/analytics/sla', { params });
+        return response.data;
+    },
+
+    // Get root cause stats
+    getRootCauseStats: async (startDate?: string, endDate?: string) => {
+        const params: any = { orgId: ORG_ID };
+        if (startDate) params.startDate = startDate;
+        if (endDate) params.endDate = endDate;
+        const response = await api.get('/analytics/root-causes', { params });
+        return response.data;
+    },
+
+    // Get team performance
+    getTeamPerformance: async (startDate?: string, endDate?: string) => {
+        const params: any = { orgId: ORG_ID };
+        if (startDate) params.startDate = startDate;
+        if (endDate) params.endDate = endDate;
+        const response = await api.get('/analytics/team-performance', { params });
+        return response.data;
+    },
+
+    // Get incident trend
+    getIncidentTrend: async (days: number = 30) => {
+        const response = await api.get('/analytics/trend', {
+            params: { orgId: ORG_ID, days },
         });
         return response.data;
     },
