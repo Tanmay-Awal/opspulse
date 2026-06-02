@@ -11,7 +11,8 @@ import {
     formatStatus,
     formatDate,
 } from '@/lib/utils';
-import { Terminal, Activity, ArrowLeft, Filter, AlertTriangle, ShieldAlert, Award } from 'lucide-react';
+import { Terminal, Activity, ArrowLeft, Filter, AlertTriangle, ShieldAlert, Award, Search, MoreVertical, CheckCircle, Sparkles, BarChart2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function IncidentsPage() {
     const [incidents, setIncidents] = useState<Incident[]>([]);
@@ -22,7 +23,6 @@ export default function IncidentsPage() {
 
     useEffect(() => {
         fetchIncidents();
-        // Poll every 5 seconds for real-time updates
         const interval = setInterval(fetchIncidents, 5000);
         return () => clearInterval(interval);
     }, [filter]);
@@ -45,180 +45,202 @@ export default function IncidentsPage() {
         }
     };
 
-    const handleAcknowledge = async (id: string) => {
+    const handleAcknowledge = async (id: string, e: React.MouseEvent) => {
+        e.preventDefault();
         try {
             await incidentsApi.acknowledge(id);
-            fetchIncidents(); // Refresh list
-        } catch (error) {
+            toast.success('Incident acknowledged');
+            fetchIncidents();
+        } catch (error: any) {
             console.error('Failed to acknowledge:', error);
-            alert('Failed to acknowledge incident');
+            toast.error(error?.response?.data?.message || 'Failed to acknowledge incident');
         }
     };
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-transparent flex flex-col items-center justify-center font-mono text-neutral-500">
-                <Terminal className="animate-pulse mb-4" size={32} />
-                <p>INITIALIZING_SYSTEM_DATA...</p>
+            <div className="min-h-screen flex flex-col items-center justify-center font-sans text-slate-500 relative">
+                <Activity className="animate-spin text-purple-600 mb-4" size={32} />
+                <p className="font-medium text-slate-400 z-10">Initializing Neural Feed...</p>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-transparent pb-16 font-sans">
-            {/* Minimalist Neo-Terminal Header */}
-            <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b-[1px] border-neutral-800">
+        <div className="min-h-screen pb-16 font-sans relative">
+
+            {/* Premium Glassmorphism Header */}
+            <nav className="sticky top-0 z-50 glass-panel border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
-                            <Link
-                                href="/"
-                                className="text-neutral-500 hover:text-white transition-colors"
-                            >
+                            <Link href="/" className="text-slate-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-xl cursor-pointer">
                                 <ArrowLeft size={20} />
                             </Link>
                             <div>
-                                <h1 className="text-2xl font-bold font-mono tracking-tight text-white flex items-center gap-2">
-                                    <Activity className="text-signal-orange" size={20} />
-                                    ACTIVE_INCIDENTS
+                                <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2 drop-shadow-md">
+                                    Incident Command
                                 </h1>
-                                <p className="text-xs font-mono text-neutral-500 uppercase tracking-widest mt-1">
-                                    Status: {incidents.length} logs found
+                                <p className="text-sm text-slate-400 mt-0.5 font-medium">
+                                    Tracking {incidents.length} active anomalies
                                 </p>
                             </div>
                         </div>
 
-                        {/* Brutalist Filters */}
-                        <div className="flex bg-neutral-900 border border-neutral-800 p-1">
-                            <div className="hidden sm:flex items-center px-3 text-neutral-500">
-                                <Filter size={14} />
+                        {/* Modern Glass Filters & Nav */}
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center bg-black/40 p-1 rounded-xl border border-white/10 backdrop-blur-md overflow-x-auto max-w-full custom-scrollbar">
+                                {(['all', 'open', 'acknowledged', 'resolved'] as const).map((status) => (
+                                    <button
+                                        key={status}
+                                        onClick={() => setFilter(status)}
+                                        className={`px-4 py-1.5 text-sm font-semibold capitalize rounded-lg transition-all duration-300 whitespace-nowrap ${filter === status
+                                            ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.4)]'
+                                            : 'text-slate-400 hover:text-white hover:bg-white/10'
+                                            }`}
+                                    >
+                                        {status}
+                                    </button>
+                                ))}
                             </div>
-                            {(['all', 'open', 'acknowledged', 'resolved'] as const).map((status) => (
-                                <button
-                                    key={status}
-                                    onClick={() => setFilter(status)}
-                                    className={`px-4 py-1.5 text-xs font-mono uppercase tracking-wider transition-all duration-200 ${filter === status
-                                        ? 'bg-deep-red text-white shadow-[2px_2px_0px_0px_rgba(225,29,72,0.5)]'
-                                        : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
-                                        }`}
-                                >
-                                    {status}
-                                </button>
-                            ))}
+                            <Link href="/analytics" className="px-4 py-2 border border-white/10 bg-white/5 hover:bg-white/10 text-white font-semibold text-sm rounded-xl transition-all flex items-center gap-2 group whitespace-nowrap">
+                                <BarChart2 size={16} className="text-purple-400 group-hover:scale-110 transition-transform" />
+                                <span className="hidden sm:inline">Analytics</span>
+                            </Link>
                         </div>
                     </div>
                 </div>
-            </div>
+            </nav>
 
-            {/* Quick Analytics Bar */}
-            <div className="border-b border-neutral-800 bg-neutral-950/50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex gap-6 text-xs font-mono uppercase tracking-widest text-neutral-400">
-                    <div className="flex items-center gap-2">
-                        <Award size={14} className={slaRate && slaRate >= 95 ? 'text-acid-green' : 'text-neutral-500'} />
-                        <span>30D_SLA_RATE:</span>
-                        <span className={slaRate && slaRate >= 95 ? 'text-white' : 'text-neutral-500'}>
+            {/* Micro-Analytics Bar */}
+            <div className="border-b border-white/10 bg-white/5 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex gap-6 text-sm font-medium text-slate-400">
+                    <div className="flex items-center gap-2 group cursor-default">
+                        <Award size={16} className={slaRate && slaRate >= 95 ? 'text-indigo-400 group-hover:scale-110 transition-transform' : 'text-slate-500'} />
+                        <span>30D SLA Target:</span>
+                        <span className={`font-bold ${slaRate && slaRate >= 95 ? 'text-white' : 'text-slate-300'}`}>
                             {slaRate !== null ? `${slaRate}%` : '---'}
                         </span>
                     </div>
-                    <div className="w-px h-4 bg-neutral-800" />
-                    <div className="flex items-center gap-2">
-                        <ShieldAlert size={14} className={p1Count && p1Count > 0 ? 'text-deep-red' : 'text-neutral-500'} />
-                        <span>30D_P1_CRITS:</span>
-                        <span className={p1Count && p1Count > 0 ? 'text-white' : 'text-neutral-500'}>
+                    <div className="w-px h-5 bg-white/10" />
+                    <div className="flex items-center gap-2 group cursor-default">
+                        <ShieldAlert size={16} className={p1Count && p1Count > 0 ? 'text-orange-400 group-hover:scale-110 transition-transform' : 'text-slate-500'} />
+                        <span>30D Level-1 Extinctions:</span>
+                        <span className={`font-bold ${p1Count && p1Count > 0 ? 'text-white' : 'text-slate-300'}`}>
                             {p1Count !== null ? p1Count : '---'}
                         </span>
                     </div>
                 </div>
             </div>
 
-            {/* Incidents List */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {/* Incidents Feed */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
                 {incidents.length === 0 ? (
-                    <div className="border border-neutral-800 bg-neutral-950 p-12 text-center animate-slide-up">
-                        <AlertTriangle className="text-neutral-700 mx-auto mb-4" size={48} />
-                        <h3 className="text-lg font-mono text-white mb-2">NO_INCIDENTS_DETECTED</h3>
-                        <p className="text-sm font-mono text-neutral-500 uppercase">
+                    <div className="glass-panel rounded-3xl p-16 text-center animate-slide-up overflow-hidden relative">
+                        <div className="absolute inset-0 bg-emerald-500/10 blur-[50px] pointer-events-none"></div>
+                        <div className="w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+                            <CheckCircle size={40} />
+                        </div>
+                        <h3 className="text-2xl font-bold text-white mb-3 tracking-tight drop-shadow-lg">All Systems Nominal</h3>
+                        <p className="text-slate-400 text-lg max-w-md mx-auto">
                             {filter !== 'all'
-                                ? `System clear for [${filter}] status.`
-                                : 'All systems operating within normal parameters.'}
+                                ? `No anomalies found matching the '${filter}' sector.`
+                                : 'The grid is stable. No active anomalies detected across the infrastructure.'}
                         </p>
                     </div>
                 ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-5">
                         {incidents.map((incident, idx) => (
-                            <div
-                                key={incident.id}
-                                className={`group bg-neutral-950/50 border border-neutral-800 hover:border-neutral-600 transition-colors p-4 md:p-6 animate-slide-up hover:bg-black relative overflow-hidden`}
-                                style={{ animationDelay: `${idx * 50}ms` }}
-                            >
-                                {/* Active Indicator Bar */}
-                                <div className={`absolute left-0 top-0 bottom-0 w-1 ${incident.status === 'open' ? 'bg-deep-red' : incident.status === 'acknowledged' ? 'bg-blue-500' : 'bg-neutral-800'}`}></div>
+                            <Link href={`/incidents/${incident.id}`} key={incident.id} className="block group">
+                                <div
+                                    className="glass-panel glass-panel-hover p-5 md:p-6 rounded-2xl animate-slide-up relative overflow-hidden"
+                                    style={{ animationDelay: `${idx * 50}ms` }}
+                                >
+                                    {/* Neon Status Glow Edge */}
+                                    <div className={`absolute left-0 top-0 bottom-0 w-1.5 shadow-[0_0_10px_currentColor] ${incident.status === 'open' ? 'bg-red-500 text-red-500' : incident.status === 'acknowledged' ? 'bg-blue-500 text-blue-500' : 'bg-slate-500 text-slate-500'}`}></div>
 
-                                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 pl-3">
-                                    <div className="flex-1 min-w-0">
-                                        {/* Priority and Status Badges */}
-                                        <div className="flex flex-wrap items-center gap-2 mb-3">
-                                            <span
-                                                className={`inline-flex items-center px-2 py-0.5 text-[10px] font-mono uppercase tracking-widest border ${getPriorityColor(
-                                                    incident.priority
-                                                )}`}
-                                            >
-                                                {formatPriority(incident.priority)}
-                                            </span>
-                                            <span
-                                                className={`inline-flex items-center px-2 py-0.5 text-[10px] font-mono uppercase tracking-widest border ${getStatusColor(
-                                                    incident.status
-                                                )}`}
-                                            >
-                                                {formatStatus(incident.status)}
-                                            </span>
-                                            {incident.eventCount > 1 && (
-                                                <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-mono uppercase tracking-widest border border-neutral-700 text-neutral-400 bg-neutral-900">
-                                                    {incident.eventCount} MULTIPLE_EVENTS
+                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pl-4">
+                                        <div className="flex-1 min-w-0">
+                                            {/* Top Metadata Tags */}
+                                            <div className="flex flex-wrap items-center gap-3 mb-3">
+                                                <span className="text-xs font-bold text-slate-400 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg backdrop-blur-md">
+                                                    #{incident.id.substring(0, 8)}
                                                 </span>
-                                            )}
-                                        </div>
+                                                <span
+                                                    className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold capitalize border backdrop-blur-md ${getModernPriorityColor(incident.priority)}`}
+                                                >
+                                                    {formatPriority(incident.priority)}
+                                                </span>
+                                                <span
+                                                    className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold capitalize border backdrop-blur-md ${getModernStatusColor(incident.status)}`}
+                                                >
+                                                    {formatStatus(incident.status)}
+                                                </span>
+                                                {incident.eventCount > 1 && (
+                                                    <span className="inline-flex items-center px-2.5 py-1 text-xs font-bold bg-white/5 border border-white/10 text-slate-300 rounded-lg backdrop-blur-md">
+                                                        {incident.eventCount} Events
+                                                    </span>
+                                                )}
+                                                {/* AI Badge */}
+                                                {(incident.status === 'open' || incident.status === 'acknowledged') && (
+                                                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 backdrop-blur-md shadow-[0_0_10px_rgba(168,85,247,0.2)]">
+                                                        <Sparkles size={12} className="mr-1" /> Core AI Ready
+                                                    </span>
+                                                )}
+                                            </div>
 
-                                        {/* Title */}
-                                        <Link href={`/incidents/${incident.id}`}>
-                                            <h3 className="text-xl font-semibold text-white group-hover:text-acid-green transition-colors mb-2 line-clamp-2">
+                                            {/* Title */}
+                                            <h3 className="text-xl font-bold text-white group-hover:text-indigo-300 transition-colors mb-2 line-clamp-2 tracking-tight drop-shadow-sm">
                                                 {incident.title}
                                             </h3>
-                                        </Link>
 
-                                        {/* Metadata */}
-                                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-mono text-neutral-500 uppercase">
-                                            <span className="text-neutral-400">ID:{incident.id.substring(0, 8)}</span>
-                                            <span className="hidden sm:inline">•</span>
-                                            <span>T-{formatDate(incident.createdAt)}</span>
-                                            <span className="hidden sm:inline">•</span>
-                                            <span className="text-signal-orange/80">SRC:{incident.source}</span>
+                                            {/* Bottom Metadata */}
+                                            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-400 font-medium">
+                                                <span className="flex items-center gap-1.5">
+                                                    <Activity size={14} className="text-indigo-400" /> {incident.source}
+                                                </span>
+                                                <span className="hidden sm:inline text-white/20">•</span>
+                                                <span>{formatDate(incident.createdAt)}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Row Actions */}
+                                        <div className="flex items-center gap-3 shrink-0 mt-4 md:mt-0">
+                                            {incident.status === 'open' && (
+                                                <button
+                                                    onClick={(e) => handleAcknowledge(incident.id, e)}
+                                                    className="px-5 py-2.5 bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 font-bold text-sm rounded-xl hover:bg-indigo-500/40 transition-all shadow-[0_0_15px_rgba(99,102,241,0.2)]"
+                                                >
+                                                    Acknowledge
+                                                </button>
+                                            )}
+                                            <div className="px-5 py-2.5 bg-white/5 border border-white/10 text-white font-bold text-sm rounded-xl group-hover:bg-white/15 transition-all shadow-sm">
+                                                Deep Dive
+                                            </div>
                                         </div>
                                     </div>
-
-                                    {/* Actions */}
-                                    <div className="flex items-center gap-3 shrink-0 mt-2 md:mt-0">
-                                        {incident.status === 'open' && (
-                                            <button
-                                                onClick={() => handleAcknowledge(incident.id)}
-                                                className="px-4 py-2 bg-deep-red/10 text-deep-red border border-deep-red/50 text-xs font-mono uppercase tracking-widest hover:bg-deep-red hover:text-white transition-all shadow-[2px_2px_0px_0px_rgba(225,29,72,0.3)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
-                                            >
-                                                [ACKNOWLEDGE]
-                                            </button>
-                                        )}
-                                        <Link
-                                            href={`/incidents/${incident.id}`}
-                                            className="px-4 py-2 bg-transparent text-white border border-neutral-700 text-xs font-mono uppercase tracking-widest hover:bg-white hover:text-black transition-all hover:translate-x-[2px] hover:translate-y-[2px]"
-                                        >
-                                            View_Details
-                                        </Link>
-                                    </div>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 )}
             </div>
         </div>
     );
+}
+
+// Glass UI Color Helpers
+function getModernPriorityColor(priority: string) {
+    if (priority.includes('p1')) return 'bg-red-500/20 text-red-400 border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.2)]';
+    if (priority.includes('p2')) return 'bg-orange-500/20 text-orange-400 border-orange-500/30 shadow-[0_0_10px_rgba(249,115,22,0.2)]';
+    if (priority.includes('p3')) return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.2)]';
+    return 'bg-blue-500/20 text-blue-400 border-blue-500/30 shadow-[0_0_10px_rgba(59,130,246,0.2)]';
+}
+
+function getModernStatusColor(status: string) {
+    if (status === 'open') return 'bg-red-500/20 text-red-400 border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.2)]';
+    if (status === 'acknowledged') return 'bg-blue-500/20 text-blue-400 border-blue-500/30 shadow-[0_0_10px_rgba(59,130,246,0.2)]';
+    if (status === 'resolved') return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.2)]';
+    if (status === 'closed') return 'bg-slate-500/20 text-slate-300 border-slate-500/30';
+    return 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30 shadow-[0_0_10px_rgba(99,102,241,0.2)]';
 }

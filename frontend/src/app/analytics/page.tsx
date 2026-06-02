@@ -20,7 +20,7 @@ import {
 } from 'recharts';
 import { Terminal, ArrowLeft, Download, Activity, Clock, Award, Users, AlertTriangle } from 'lucide-react';
 
-const COLORS = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899'];
+const COLORS = ['#A855F7', '#EC4899', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
 
 export default function AnalyticsPage() {
     const [slaMetrics, setSlaMetrics] = useState<any>(null);
@@ -65,9 +65,9 @@ export default function AnalyticsPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-transparent flex flex-col items-center justify-center font-mono text-neutral-500">
-                <Terminal className="animate-pulse mb-4" size={32} />
-                <p>AGGREGATING_DATA_SYSTEMS...</p>
+            <div className="min-h-screen flex flex-col items-center justify-center font-sans text-slate-500 relative">
+                <Activity className="animate-spin text-purple-600 mb-4" size={32} />
+                <p className="font-medium text-slate-400 z-10">Aggregating telemetry data...</p>
             </div>
         );
     }
@@ -75,151 +75,143 @@ export default function AnalyticsPage() {
     const priorityData = [
         { name: 'P1 CRITICAL', value: slaMetrics?.p1Count || 0, color: '#EF4444' },
         { name: 'P2 HIGH', value: slaMetrics?.p2Count || 0, color: '#F59E0B' },
-        { name: 'P3 MEDIUM', value: slaMetrics?.p3Count || 0, color: '#FBBF24' },
+        { name: 'P3 MEDIUM', value: slaMetrics?.p3Count || 0, color: '#10B981' },
         { name: 'P4 LOW', value: slaMetrics?.p4Count || 0, color: '#3B82F6' },
     ];
 
     return (
-        <div className="min-h-screen bg-transparent pb-16 font-sans">
-            {/* Minimalist Neo-Terminal Header */}
-            <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b-[1px] border-neutral-800">
+        <div className="min-h-screen pb-16 font-sans relative">
+            {/* Premium Glassmorphism Header */}
+            <div className="sticky top-0 z-50 glass-panel border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
                             <Link
                                 href="/"
-                                className="text-neutral-500 hover:text-white transition-colors"
+                                className="text-slate-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-xl cursor-pointer"
                             >
                                 <ArrowLeft size={20} />
                             </Link>
                             <div>
-                                <h1 className="text-2xl font-bold font-mono tracking-tight text-white flex items-center gap-2">
-                                    <Activity className="text-acid-green" size={20} />
-                                    SYSTEM_ANALYTICS
+                                <h1 className="text-2xl font-bold font-sans tracking-tight text-white flex items-center gap-2 drop-shadow-md">
+                                    <Activity className="text-purple-500 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]" size={24} />
+                                    System Analytics
                                 </h1>
-                                <p className="text-xs font-mono text-neutral-500 uppercase tracking-widest mt-1">
-                                    PERFORMANCE_METRICS_AND_INSIGHTS
+                                <p className="text-xs font-medium font-sans text-slate-400 mt-1">
+                                    Platform and personnel metrics
                                 </p>
                             </div>
                         </div>
 
-                        {/* Top Filters */}
-                        <div className="flex bg-neutral-900 border border-neutral-800 p-1">
-                            {([7, 30, 90] as const).map((days) => (
-                                <button
-                                    key={days}
-                                    onClick={() => setTimeRange(days)}
-                                    className={`px-4 py-1.5 text-xs font-mono uppercase tracking-wider transition-all duration-200 ${timeRange === days
-                                        ? 'bg-blue-600 text-white shadow-[2px_2px_0px_0px_rgba(37,99,235,0.5)]'
-                                        : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
-                                        }`}
-                                >
-                                    {days}D
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
+                        {/* Export Buttons + Filters in Header */}
+                        <div className="flex flex-wrap items-center gap-3">
+                            <button
+                                onClick={() => handleExport('sla')}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 text-slate-300 text-xs font-semibold rounded-lg hover:text-white hover:bg-white/10 transition-all shadow-sm group"
+                            >
+                                <Download size={14} className="group-hover:text-purple-400 transition-colors" /> SLA Metrics
+                            </button>
+                            <button
+                                onClick={() => handleExport('root-causes')}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 text-slate-300 text-xs font-semibold rounded-lg hover:text-white hover:bg-white/10 transition-all shadow-sm group"
+                            >
+                                <Download size={14} className="group-hover:text-pink-400 transition-colors" /> Root Causes
+                            </button>
+                            <button
+                                onClick={() => handleExport('team-performance')}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 text-slate-300 text-xs font-semibold rounded-lg hover:text-white hover:bg-white/10 transition-all shadow-sm group"
+                            >
+                                <Download size={14} className="group-hover:text-blue-400 transition-colors" /> Team Performance
+                            </button>
 
-            {/* Action Bar / Export */}
-            <div className="border-b border-neutral-800 bg-neutral-950/50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-                    <div className="flex flex-wrap items-center gap-3">
-                        <span className="text-xs font-mono text-neutral-500 uppercase tracking-widest mr-2">
-                            [DATA_EXPORTS]
-                        </span>
-                        <button
-                            onClick={() => handleExport('sla')}
-                            className="flex items-center gap-2 px-4 py-1.5 bg-transparent border border-neutral-700 text-neutral-400 text-xs font-mono uppercase tracking-widest hover:text-white hover:border-white transition-all hover:translate-x-[1px] hover:translate-y-[1px]"
-                        >
-                            <Download size={14} /> SLA_METRICS
-                        </button>
-                        <button
-                            onClick={() => handleExport('root-causes')}
-                            className="flex items-center gap-2 px-4 py-1.5 bg-transparent border border-neutral-700 text-neutral-400 text-xs font-mono uppercase tracking-widest hover:text-white hover:border-white transition-all hover:translate-x-[1px] hover:translate-y-[1px]"
-                        >
-                            <Download size={14} /> ROOT_CAUSES
-                        </button>
-                        <button
-                            onClick={() => handleExport('team-performance')}
-                            className="flex items-center gap-2 px-4 py-1.5 bg-transparent border border-neutral-700 text-neutral-400 text-xs font-mono uppercase tracking-widest hover:text-white hover:border-white transition-all hover:translate-x-[1px] hover:translate-y-[1px]"
-                        >
-                            <Download size={14} /> TEAM_PERFORMANCE
-                        </button>
+                            <div className="h-6 w-px bg-white/10 mx-1 hidden md:block"></div>
+
+                            <div className="flex bg-black/40 border border-white/10 p-1 rounded-xl backdrop-blur-md">
+                                {([7, 30, 90] as const).map((days) => (
+                                    <button
+                                        key={days}
+                                        onClick={() => setTimeRange(days)}
+                                        className={`px-4 py-1.5 text-xs font-bold transition-all duration-300 rounded-lg ${timeRange === days
+                                            ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.4)]'
+                                            : 'text-slate-400 hover:text-white hover:bg-white/10'
+                                            }`}
+                                    >
+                                        {days}D
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             {/* Content */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-slide-up">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-slide-up relative z-10">
                 {/* Key Metrics Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <MetricCard
-                        title="TOTAL_INCIDENTS"
+                        title="Total Incidents"
                         value={slaMetrics?.totalIncidents || 0}
                         icon={<AlertTriangle size={24} />}
-                        color="text-blue-500"
-                        borderColor="border-blue-500/50"
+                        color="text-indigo-400"
+                        bgGlow="bg-indigo-500/20"
+                        borderColor="border-indigo-500/30"
                     />
                     <MetricCard
-                        title="SLA_COMPLIANCE"
+                        title="SLA Compliance"
                         value={`${slaMetrics?.slaComplianceRate || 0}%`}
                         icon={<Award size={24} />}
-                        color={slaMetrics?.slaComplianceRate >= 95 ? 'text-acid-green' : 'text-deep-red'}
-                        borderColor={slaMetrics?.slaComplianceRate >= 95 ? 'border-acid-green/50' : 'border-deep-red/50'}
+                        color={slaMetrics?.slaComplianceRate >= 95 ? 'text-emerald-400' : 'text-red-400'}
+                        bgGlow={slaMetrics?.slaComplianceRate >= 95 ? 'bg-emerald-500/20' : 'bg-red-500/20'}
+                        borderColor={slaMetrics?.slaComplianceRate >= 95 ? 'border-emerald-500/30' : 'border-red-500/30'}
                     />
                     <MetricCard
-                        title="AVG_ACK_TIME"
+                        title="Average Ack Time"
                         value={`${slaMetrics?.avgAcknowledgmentTimeMinutes || 0}m`}
                         icon={<Clock size={24} />}
-                        color="text-purple-500"
-                        borderColor="border-purple-500/50"
+                        color="text-purple-400"
+                        bgGlow="bg-purple-500/20"
+                        borderColor="border-purple-500/30"
                     />
                     <MetricCard
-                        title="AVG_RESOLVE_TIME"
+                        title="Average Resolve Time"
                         value={`${Math.round((slaMetrics?.avgResolutionTimeMinutes || 0) / 60)}h`}
                         icon={<Activity size={24} />}
-                        color="text-signal-orange"
-                        borderColor="border-signal-orange/50"
+                        color="text-orange-400"
+                        bgGlow="bg-orange-500/20"
+                        borderColor="border-orange-500/30"
                     />
                 </div>
 
                 {/* Charts Row 1 */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Incident Trend */}
-                    <div className="bg-neutral-950 border border-neutral-800 p-6 relative">
-                        <div className="absolute top-0 right-0 p-2 border-b border-l border-neutral-800 bg-black text-neutral-500 font-mono text-[10px] tracking-widest">
-                            // TREND_ANALYSIS
-                        </div>
-                        <h2 className="text-sm font-mono text-neutral-500 uppercase tracking-widest mb-6 border-b border-neutral-800 pb-2">
-                            TIME_SERIES_INCIDENTS
+                    <div className="glass-panel rounded-2xl p-6 relative">
+                        <h2 className="text-sm font-bold text-slate-300 tracking-wide mb-6 border-b border-white/10 pb-3 flex items-center gap-2">
+                            <Activity size={16} className="text-purple-400" /> Time Series Incidents
                         </h2>
                         <ResponsiveContainer width="100%" height={300}>
                             <LineChart data={trendData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                                <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#888' }} stroke="#555" />
-                                <YAxis tick={{ fill: '#888' }} stroke="#555" />
+                                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                                <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#888' }} stroke="#ffffff20" />
+                                <YAxis tick={{ fill: '#888' }} stroke="#ffffff20" />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#000', borderColor: '#333', color: '#fff' }}
+                                    contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', borderColor: '#ffffff20', color: '#fff', borderRadius: '8px' }}
                                     itemStyle={{ fontFamily: 'monospace' }}
                                 />
-                                <Legend wrapperStyle={{ fontFamily: 'monospace', fontSize: '12px' }} />
-                                <Line type="step" dataKey="p1" stroke="#EF4444" name="P1_CRIT" strokeWidth={2} dot={false} />
-                                <Line type="step" dataKey="p2" stroke="#F59E0B" name="P2_HIGH" strokeWidth={2} dot={false} />
-                                <Line type="step" dataKey="p3" stroke="#FBBF24" name="P3_MED" strokeWidth={2} dot={false} />
-                                <Line type="step" dataKey="p4" stroke="#3B82F6" name="P4_LOW" strokeWidth={2} dot={false} />
+                                <Legend wrapperStyle={{ fontFamily: 'sans-serif', fontSize: '12px', color: '#aaa' }} />
+                                <Line type="monotone" dataKey="p1" stroke="#EF4444" name="P1 CRIT" strokeWidth={3} dot={{ r: 4, fill: '#EF4444', strokeWidth: 0 }} activeDot={{ r: 6 }} />
+                                <Line type="monotone" dataKey="p2" stroke="#F59E0B" name="P2 HIGH" strokeWidth={3} dot={{ r: 4, fill: '#F59E0B', strokeWidth: 0 }} />
+                                <Line type="monotone" dataKey="p3" stroke="#10B981" name="P3 MED" strokeWidth={3} dot={false} />
+                                <Line type="monotone" dataKey="p4" stroke="#3B82F6" name="P4 LOW" strokeWidth={3} dot={false} />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
 
                     {/* Priority Distribution */}
-                    <div className="bg-neutral-950 border border-neutral-800 p-6 relative">
-                        <div className="absolute top-0 right-0 p-2 border-b border-l border-neutral-800 bg-black text-neutral-500 font-mono text-[10px] tracking-widest">
-                            // PRIORITY_DIST
-                        </div>
-                        <h2 className="text-sm font-mono text-neutral-500 uppercase tracking-widest mb-6 border-b border-neutral-800 pb-2">
-                            SEVERITY_BREAKDOWN
+                    <div className="glass-panel rounded-2xl p-6 relative">
+                        <h2 className="text-sm font-bold text-slate-300 tracking-wide mb-6 border-b border-white/10 pb-3 flex items-center gap-2">
+                            <AlertTriangle size={16} className="text-pink-400" /> Severity Breakdown
                         </h2>
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
@@ -240,7 +232,7 @@ export default function AnalyticsPage() {
                                     ))}
                                 </Pie>
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#000', borderColor: '#333', color: '#fff', fontFamily: 'monospace' }}
+                                    contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', borderColor: '#ffffff20', color: '#fff', borderRadius: '8px', fontFamily: 'monospace' }}
                                 />
                             </PieChart>
                         </ResponsiveContainer>
@@ -250,28 +242,25 @@ export default function AnalyticsPage() {
                 {/* Charts Row 2 */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Root Cause Distribution */}
-                    <div className="bg-neutral-950 border border-neutral-800 p-6 relative">
-                        <div className="absolute top-0 right-0 p-2 border-b border-l border-neutral-800 bg-black text-neutral-500 font-mono text-[10px] tracking-widest">
-                            // ROOT_CAUSE_STATS
-                        </div>
-                        <h2 className="text-sm font-mono text-neutral-500 uppercase tracking-widest mb-6 border-b border-neutral-800 pb-2">
-                            ROOT_CAUSE_DISTRIBUTION
+                    <div className="glass-panel rounded-2xl p-6 relative">
+                        <h2 className="text-sm font-bold text-slate-300 tracking-wide mb-6 border-b border-white/10 pb-3 flex items-center gap-2">
+                            <Clock size={16} className="text-blue-400" /> Root Cause Distribution
                         </h2>
                         {rootCauseStats.length === 0 ? (
-                            <div className="text-center py-12 text-neutral-600 font-mono text-sm uppercase">
-                                [NO_RESOLVED_DATA_FOUND]
+                            <div className="text-center py-12 text-slate-500 font-sans text-sm font-medium">
+                                No telemetry data available
                             </div>
                         ) : (
                             <ResponsiveContainer width="100%" height={300}>
                                 <BarChart data={rootCauseStats}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                                    <XAxis dataKey="category" tick={{ fontSize: 10, fill: '#888' }} stroke="#555" interval={0} angle={-45} textAnchor="end" height={80} />
-                                    <YAxis tick={{ fill: '#888' }} stroke="#555" />
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                                    <XAxis dataKey="category" tick={{ fontSize: 10, fill: '#888' }} stroke="#ffffff20" interval={0} angle={-45} textAnchor="end" height={80} />
+                                    <YAxis tick={{ fill: '#888' }} stroke="#ffffff20" />
                                     <Tooltip
-                                        contentStyle={{ backgroundColor: '#000', borderColor: '#333', color: '#fff', fontFamily: 'monospace' }}
-                                        cursor={{ fill: '#222' }}
+                                        contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', borderColor: '#ffffff20', color: '#fff', borderRadius: '8px', fontFamily: 'monospace' }}
+                                        cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                                     />
-                                    <Bar dataKey="count" fill="#3B82F6">
+                                    <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                                         {rootCauseStats.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                         ))}
@@ -282,26 +271,23 @@ export default function AnalyticsPage() {
                     </div>
 
                     {/* SLA Performance */}
-                    <div className="bg-neutral-950 border border-neutral-800 p-6 relative">
-                        <div className="absolute top-0 right-0 p-2 border-b border-l border-neutral-800 bg-black text-neutral-500 font-mono text-[10px] tracking-widest">
-                            // SLA_V_ACTUAL
-                        </div>
-                        <h2 className="text-sm font-mono text-neutral-500 uppercase tracking-widest mb-6 border-b border-neutral-800 pb-2">
-                            SLA_ADHERENCE_RATIOS
+                    <div className="glass-panel rounded-2xl p-6 relative">
+                        <h2 className="text-sm font-bold text-slate-300 tracking-wide mb-6 border-b border-white/10 pb-3 flex items-center gap-2">
+                            <Award size={16} className="text-emerald-400" /> SLA Adherence Ratios
                         </h2>
                         <div className="space-y-8 mt-4">
                             <div>
                                 <div className="flex justify-between mb-2">
-                                    <span className="text-xs font-mono text-neutral-400">
-                                        [ACKNOWLEDGE_SLA]
+                                    <span className="text-xs font-semibold text-slate-400">
+                                        Acknowledgment SLA
                                     </span>
-                                    <span className="text-xs font-mono font-bold text-white">
-                                        {slaMetrics?.acknowledgedOnTime || 0} / {(slaMetrics?.acknowledgedOnTime || 0) + (slaMetrics?.acknowledgedLate || 0)} ON_TIME
+                                    <span className="text-xs font-bold text-white">
+                                        {slaMetrics?.acknowledgedOnTime || 0} / {(slaMetrics?.acknowledgedOnTime || 0) + (slaMetrics?.acknowledgedLate || 0)} On Time
                                     </span>
                                 </div>
-                                <div className="w-full bg-neutral-900 h-2 border border-neutral-800">
+                                <div className="w-full bg-black/40 h-2.5 rounded-full overflow-hidden border border-white/5">
                                     <div
-                                        className="bg-acid-green h-full relative"
+                                        className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full relative"
                                         style={{
                                             width: `${((slaMetrics?.acknowledgedOnTime || 0) /
                                                 ((slaMetrics?.acknowledgedOnTime || 0) +
@@ -317,16 +303,16 @@ export default function AnalyticsPage() {
 
                             <div>
                                 <div className="flex justify-between mb-2">
-                                    <span className="text-xs font-mono text-neutral-400">
-                                        [RESOLUTION_SLA]
+                                    <span className="text-xs font-semibold text-slate-400">
+                                        Resolution SLA
                                     </span>
-                                    <span className="text-xs font-mono font-bold text-white">
-                                        {slaMetrics?.resolvedOnTime || 0} / {(slaMetrics?.resolvedOnTime || 0) + (slaMetrics?.resolvedLate || 0)} ON_TIME
+                                    <span className="text-xs font-bold text-white">
+                                        {slaMetrics?.resolvedOnTime || 0} / {(slaMetrics?.resolvedOnTime || 0) + (slaMetrics?.resolvedLate || 0)} On Time
                                     </span>
                                 </div>
-                                <div className="w-full bg-neutral-900 h-2 border border-neutral-800">
+                                <div className="w-full bg-black/40 h-2.5 rounded-full overflow-hidden border border-white/5">
                                     <div
-                                        className="bg-blue-500 h-full relative"
+                                        className="bg-gradient-to-r from-blue-500 to-indigo-400 h-full relative"
                                         style={{
                                             width: `${((slaMetrics?.resolvedOnTime || 0) /
                                                 ((slaMetrics?.resolvedOnTime || 0) +
@@ -340,19 +326,19 @@ export default function AnalyticsPage() {
                                 </div>
                             </div>
 
-                            <div className="pt-6 border-t border-neutral-800">
+                            <div className="pt-6 border-t border-white/10">
                                 <div className="grid grid-cols-2 gap-4 text-center">
-                                    <div className="bg-neutral-900 border border-neutral-800 p-4">
-                                        <p className="text-3xl font-mono font-bold text-acid-green mb-1">
+                                    <div className="bg-white/5 border border-white/10 rounded-xl p-4 shadow-sm backdrop-blur-sm">
+                                        <p className="text-3xl font-bold text-emerald-400 mb-1 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]">
                                             {slaMetrics?.acknowledgedOnTime || 0}
                                         </p>
-                                        <p className="text-[10px] font-mono text-neutral-500 uppercase">SYS_ON_TIME</p>
+                                        <p className="text-xs font-semibold text-slate-400">SYS_On Time</p>
                                     </div>
-                                    <div className="bg-neutral-900 border border-neutral-800 p-4">
-                                        <p className="text-3xl font-mono font-bold text-deep-red mb-1">
+                                    <div className="bg-white/5 border border-white/10 rounded-xl p-4 shadow-sm backdrop-blur-sm">
+                                        <p className="text-3xl font-bold text-red-400 mb-1 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]">
                                             {slaMetrics?.acknowledgedLate || 0}
                                         </p>
-                                        <p className="text-[10px] font-mono text-neutral-500 uppercase">SYS_VIOLATION</p>
+                                        <p className="text-xs font-semibold text-slate-400">System Violation</p>
                                     </div>
                                 </div>
                             </div>
@@ -361,64 +347,61 @@ export default function AnalyticsPage() {
                 </div>
 
                 {/* Team Performance Table */}
-                <div className="bg-neutral-950 border border-neutral-800 relative">
-                    <div className="absolute top-0 right-0 p-2 border-b border-l border-neutral-800 bg-black text-neutral-500 font-mono text-[10px] tracking-widest z-10">
-                        // PERSONNEL_STATS
-                    </div>
-                    <div className="px-6 py-4 border-b border-neutral-800">
-                        <h2 className="text-sm font-mono text-neutral-500 uppercase tracking-widest flex items-center gap-2">
-                            <Users size={16} /> TEAM_EFFICIENCY_MATRIX
+                <div className="glass-panel rounded-2xl relative overflow-hidden">
+                    <div className="px-6 py-5 border-b border-white/10 bg-white/5">
+                        <h2 className="text-sm font-bold text-white tracking-wide flex items-center gap-2 drop-shadow-sm">
+                            <Users size={16} className="text-indigo-400" /> Team Efficiency Matrix
                         </h2>
                     </div>
                     {teamPerformance.length === 0 ? (
-                        <div className="text-center py-12 text-neutral-600 font-mono text-sm uppercase">
-                            [NO_PERSONNEL_DATA_FOUND]
+                        <div className="text-center py-12 text-slate-500 font-sans text-sm font-medium">
+                            No personnel data found
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-neutral-800">
-                                <thead className="bg-black">
+                            <table className="min-w-full divide-y divide-white/10">
+                                <thead className="bg-black/40">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-[10px] font-mono text-neutral-500 uppercase tracking-widest">
-                                            ENGINEER_ID
+                                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 tracking-wider">
+                                            Engineer
                                         </th>
-                                        <th className="px-6 py-3 text-left text-[10px] font-mono text-neutral-500 uppercase tracking-widest">
-                                            HANDLED
+                                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 tracking-wider">
+                                            Handled
                                         </th>
-                                        <th className="px-6 py-3 text-left text-[10px] font-mono text-neutral-500 uppercase tracking-widest">
+                                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 tracking-wider">
                                             MTTA
                                         </th>
-                                        <th className="px-6 py-3 text-left text-[10px] font-mono text-neutral-500 uppercase tracking-widest">
+                                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 tracking-wider">
                                             MTTR
                                         </th>
-                                        <th className="px-6 py-3 text-left text-[10px] font-mono text-neutral-500 uppercase tracking-widest">
-                                            COMPLIANCE
+                                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 tracking-wider">
+                                            Compliance
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-neutral-950 divide-y divide-neutral-800/50">
+                                <tbody className="divide-y divide-white/5 bg-transparent">
                                     {teamPerformance.map((member) => (
-                                        <tr key={member.userId} className="hover:bg-neutral-900 transition-colors">
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-white flex items-center gap-2">
-                                                <div className="w-2 h-2 rounded-none bg-acid-green"></div>
+                                        <tr key={member.userId} className="hover:bg-white/5 transition-colors">
+                                            <td className="px-6 py-5 whitespace-nowrap text-sm font-bold text-white flex items-center gap-3">
+                                                <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></div>
                                                 {member.userName}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-neutral-400">
+                                            <td className="px-6 py-5 whitespace-nowrap text-sm font-medium text-slate-300">
                                                 {member.incidentsHandled}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-neutral-400">
+                                            <td className="px-6 py-5 whitespace-nowrap text-sm font-medium text-slate-300">
                                                 {member.avgAcknowledgmentMinutes}m
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-neutral-400">
+                                            <td className="px-6 py-5 whitespace-nowrap text-sm font-medium text-slate-300">
                                                 {Math.round(member.avgResolutionMinutes / 60)}h
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
+                                            <td className="px-6 py-5 whitespace-nowrap">
                                                 <span
-                                                    className={`inline-flex px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-widest border ${member.slaComplianceRate >= 95
-                                                        ? 'bg-acid-green/10 text-acid-green border-acid-green/50'
+                                                    className={`inline-flex px-3 py-1 text-xs font-bold rounded-lg border backdrop-blur-sm ${member.slaComplianceRate >= 95
+                                                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.2)]'
                                                         : member.slaComplianceRate >= 80
-                                                            ? 'bg-signal-orange/10 text-signal-orange border-signal-orange/50'
-                                                            : 'bg-deep-red/10 text-deep-red border-deep-red/50'
+                                                            ? 'bg-orange-500/20 text-orange-300 border-orange-500/30 shadow-[0_0_10px_rgba(249,115,22,0.2)]'
+                                                            : 'bg-red-500/20 text-red-300 border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.2)]'
                                                         }`}
                                                 >
                                                     {member.slaComplianceRate}%
@@ -441,37 +424,36 @@ function MetricCard({
     value,
     icon,
     color,
+    bgGlow,
     borderColor
 }: {
     title: string;
     value: string | number;
     icon: React.ReactNode;
     color: string;
+    bgGlow: string;
     borderColor: string;
 }) {
     return (
-        <div className={`bg-neutral-950 border ${borderColor} p-6 relative overflow-hidden group hover:bg-neutral-900 transition-colors`}>
-            {/* Top decorative stripe */}
-            <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-current to-transparent opacity-20 ${color}`} />
+        <div className={`glass-panel glass-panel-hover border ${borderColor} rounded-2xl p-6 relative overflow-hidden group`}>
+            {/* Background glowing orb */}
+            <div className={`absolute -right-10 -top-10 w-32 h-32 rounded-full blur-[40px] transition-colors ${bgGlow} opacity-50 group-hover:opacity-100`}></div>
 
-            <div className="flex flex-col justify-between h-full">
+            <div className="flex flex-col justify-between h-full relative z-10">
                 <div className="flex items-start justify-between mb-4">
-                    <p className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest leading-tight w-2/3">
+                    <p className="text-sm font-semibold text-slate-400 tracking-wide w-2/3">
                         {title}
                     </p>
-                    <div className={`p-2 bg-black border ${borderColor} ${color}`}>
+                    <div className={`p-2.5 rounded-xl border border-white/10 ${bgGlow} text-white backdrop-blur-md shadow-sm`}>
                         {icon}
                     </div>
                 </div>
                 <div>
-                    <p className="text-3xl font-mono font-bold text-white tracking-tighter">
+                    <p className={`text-4xl font-extrabold tracking-tight drop-shadow-md ${color === 'text-white' ? 'text-white' : 'text-white'}`}>
                         {value}
                     </p>
                 </div>
             </div>
-
-            {/* Bottom-right corner accent */}
-            <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-neutral-600 m-1" />
         </div>
     );
 }

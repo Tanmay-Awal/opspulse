@@ -19,6 +19,7 @@ model Organization {
   incidents     Incident[]
   onCallSchedules  OnCallSchedule[]
   escalationPolicies EscalationPolicy[] 
+  remediationPlaybooks    RemediationPlaybook[]
 
   @@map("organizations")
 }
@@ -145,4 +146,75 @@ model WebhookJob {
 
   @@index([status, nextRetryAt])
   @@map("webhook_jobs")
+}
+
+model RemediationPlaybook {
+  id               String   @id @default(uuid())
+  orgId            String   @map("org_id")
+  name             String
+  description      String?
+  triggerConditions Json    @map("trigger_conditions")
+  steps            Json     // Array of remediation steps
+  isActive         Boolean  @default(true) @map("is_active")
+  successCount     Int      @default(0) @map("success_count")
+  failureCount     Int      @default(0) @map("failure_count")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [orgId], references: [id])
+
+  @@index([orgId])
+  @@index([isActive])
+  @@map("remediation_playbooks")
+}
+
+model RemediationExecution {
+  id              String    @id @default(uuid())
+  incidentId      String    @map("incident_id")
+  playbookId      String?   @map("playbook_id")
+  triggeredBy     String    @map("triggered_by") // 'manual' | 'auto'
+  status          String    @default("pending") // 'pending' | 'executing' | 'completed' | 'failed' | 'rejected'
+  aiAnalysis      String?   @map("ai_analysis") @db.Text
+  aiPlan          String?   @map("ai_plan") @db.Text
+  executionLog    Json?     @map("execution_log")
+  confidenceScore Float?    @map("confidence_score")
+  approvedBy      String?   @map("approved_by")
+  approvedAt      DateTime? @map("approved_at")
+  rejectedBy      String?   @map("rejected_by")
+  rejectedAt      DateTime? @map("rejected_at")
+  completedAt     DateTime? @map("completed_at")
+  error           String?
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  @@index([incidentId])
+  @@index([status])
+  @@map("remediation_executions")
+}
+
+model RemediationStepLog {
+  id          String   @id @default(uuid())
+  executionId String   @map("execution_id")
+  stepIndex   Int      @map("step_index")
+  stepType    String   @map("step_type")
+  input       Json?
+  output      Json?
+  status      String   @default("pending") // 'pending' | 'success' | 'failed' | 'skipped'
+  durationMs  Int?     @map("duration_ms")
+  error       String?
+  timestamp   DateTime @default(now())
+
+  @@index([executionId])
+  @@map("remediation_step_logs")
+}
+
+model PlaybookFeedback {
+  id          String   @id @default(uuid())
+  executionId String   @map("execution_id")
+  outcome     String   // 'success' | 'failure' | 'rollback'
+  feedbackNote String? @map("feedback_note") @db.Text
+  createdBy   String   @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([executionId])
+  @@map("playbook_feedback")
 }

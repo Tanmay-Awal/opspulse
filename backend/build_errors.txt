@@ -1,9 +1,12 @@
-﻿src/analytics/analytics.controller.ts(100,21): error TS2339: Property 'reportsService' does not exist on type 'AnalyticsController'.
-src/analytics/analytics.controller.ts(114,22): error TS1272: A type referenced in a decorated signature must be imported with 'import type' or a namespace import when 'isolatedModules' and 'emitDecoratorMetadata' are enabled.
-src/analytics/analytics.controller.ts(154,9): error TS18048: 'res' is possibly 'undefined'.
-src/analytics/analytics.controller.ts(155,9): error TS18048: 'res' is possibly 'undefined'.
-src/analytics/analytics.controller.ts(156,9): error TS18048: 'res' is possibly 'undefined'.
-src/analytics/reports.service.ts(169,13): error TS2304: Cannot find name 'slackMessage'.
-src/analytics/reports.service.ts(188,13): error TS2304: Cannot find name 'slackMessage'.
-src/analytics/reports.service.ts(198,9): error TS2304: Cannot find name 'slackMessage'.
-src/analytics/reports.service.ts(211,16): error TS2304: Cannot find name 'slackMessage'.
+﻿src/remediation/remediation.controller.ts(13,11): error TS4053: Return type of public method from exported class has or is using name 'AnalysisResult' from external module "D:/FullStack Projects/Tanmay/OpsPulse/opspulse/backend/src/remediation/services/ai-analyzer.service" but cannot be named.
+src/remediation/remediation.controller.ts(13,11): error TS4053: Return type of public method from exported class has or is using name 'RemediationPlan' from external module "D:/FullStack Projects/Tanmay/OpsPulse/opspulse/backend/src/remediation/services/ai-analyzer.service" but cannot be named.
+src/remediation/remediation.service.ts(21,11): error TS4053: Return type of public method from exported class has or is using name 'AnalysisResult' from external module "D:/FullStack Projects/Tanmay/OpsPulse/opspulse/backend/src/remediation/services/ai-analyzer.service" but cannot be named.
+src/remediation/remediation.service.ts(21,11): error TS4053: Return type of public method from exported class has or is using name 'RemediationPlan' from external module "D:/FullStack Projects/Tanmay/OpsPulse/opspulse/backend/src/remediation/services/ai-analyzer.service" but cannot be named.
+src/remediation/remediation.service.ts(112,22): error TS2322: Type 'string | null' is not assignable to type 'string | undefined'.
+  Type 'null' is not assignable to type 'string | undefined'.
+src/remediation/remediation.service.ts(476,43): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+src/remediation/services/ai-analyzer.service.ts(71,39): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+src/remediation/services/ai-analyzer.service.ts(147,39): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
